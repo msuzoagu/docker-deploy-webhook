@@ -33,6 +33,11 @@ RUN apk update && apk add docker
 
 WORKDIR /usr/src/app
 
+# create non-root user to use for the rest of the build
+RUN addgroup -S app && adduser -S -G app app
+RUN chown -R app /usr/src/app
+USER app
+
 # install packages before copying code to take advantage of image layer caching
 COPY package.json .
 COPY npm-shrinkwrap.json .
