@@ -1,0 +1,16 @@
+<div id="wrapper">
+  <h2>Docker-Deploy Dashboard</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Service</th>
+        <th>Deploy</th>
+      </tr>
+    </thead>
+    <tbody id="services" data-token="{{token}}"></tbody>
+  </table>
+</div>
+
+
+{{#section 'script'}}
+<script src='/js/deploy.js'></script> {{/section}}

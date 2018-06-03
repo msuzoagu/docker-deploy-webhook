@@ -1,4 +1,4 @@
-// Bring Your Own Plugin
+// Bring Your Own Plugins
 
 function email(notification, emailAddresses) {
   return require('./mailgun').sendEmail(notification, emailAddresses)
