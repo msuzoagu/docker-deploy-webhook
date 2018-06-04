@@ -17,7 +17,9 @@ ENV CONFIG_FILE=config.json
 
 # Github Settings - optionally used to pull the config file
 # ENV GITHUB_TOKEN
-# ENV GITHUB_URL
+
+# Don't add https:// here
+# ENV GITHUB_URL=github.com/org/repo.git
 
 # A token used to restrict access to the webhook
 # ENV TOKEN="123-456-ABC-DEF"
@@ -34,24 +36,23 @@ ENV CONFIG_FILE=config.json
 # ENV USERNAME_FILE=/run/secrets/username
 # ENV PASSWORD_FILE=/run/secrets/password
 
-RUN apk update && apk add docker
+EXPOSE ${PORT}
 
-WORKDIR /usr/src/app
+RUN apk update && apk add docker && apk add git
 
-# create non-root user to use for the rest of the build
-RUN addgroup -S app && adduser -S -G app app
-RUN chown -R app /usr/src/app
-USER app
+WORKDIR /usr/src/app/
+
+# If GITHUB_TOKEN & GITHUB_URL are set, entrypoint script will pull config file
+COPY scripts/fetchConfigFromGithub.sh /usr/local/bin/
 
 # install packages before copying code to take advantage of image layer caching
 COPY package.json .
 COPY npm-shrinkwrap.json .
-RUN npm install
+RUN npm install --unsafe-perm
 
 # copy everything else
 COPY . .
 
-RUN chmod +x ./scripts/*.sh
 
-EXPOSE ${PORT}
+ENTRYPOINT ["fetchConfigFromGithub.sh"]
 CMD [ "npm", "start" ]

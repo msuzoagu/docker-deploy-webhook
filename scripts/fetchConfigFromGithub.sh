@@ -1,4 +1,6 @@
 #!/bin/sh
+if [[ ${GITHUB_TOKEN} && ${GITHUB_URL} ]]; then
+  git -C ${CONFIG_DIR} init && git -C ${CONFIG_DIR} pull https://${GITHUB_TOKEN}@${GITHUB_URL}
+fi
 
-cd ${CONFIG_DIR}
-git init && git pull https://${GITHUB_TOKEN}@${GITHUB_URL}
+exec "$@"
