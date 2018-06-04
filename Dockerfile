@@ -54,5 +54,5 @@ RUN npm install --unsafe-perm
 COPY . .
 
 
-ENTRYPOINT ["fetchConfigFromGithub.sh"]
+ENTRYPOINT ["/usr/local/bin/fetchConfigFromGithub.sh"]
 CMD [ "npm", "start" ]
