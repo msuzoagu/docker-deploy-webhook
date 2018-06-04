@@ -36,6 +36,13 @@ ENV CONFIG_FILE=config.json
 # ENV USERNAME_FILE=/run/secrets/username
 # ENV PASSWORD_FILE=/run/secrets/password
 
+# SSL Settings - optional
+# ENV SSL_CERT_FILE=/path/to/ssl_cert_file
+# ENV SSL_KEY_FILE=/path/to/ssl_key_file
+
+# Enable Frontend (experimental - not recommended for production)
+ENV ENABLE_FRONTEND=false
+
 EXPOSE ${PORT}
 
 RUN apk update && apk add docker && apk add git

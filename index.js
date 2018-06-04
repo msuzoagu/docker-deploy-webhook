@@ -3,7 +3,6 @@
  * https://docs.docker.com/docker-hub/webhooks/
  */
 const express = require('express')
-const exphbs = require('express-handlebars')
 const bodyParser = require('body-parser')
 const app = express()
 const config = require('./lib/config')
@@ -17,22 +16,6 @@ const { port, token } = config
 app.use(bodyParser.json())
 
 app.use(bodyParser.urlencoded({ extended: true }))
-
-/* view engine (handlebars) */
-app.engine('.hbs', exphbs({
-  defaultLayout: 'main',
-  extname: '.hbs',
-  helpers: {
-    section(name, options) {
-      if (!this._sections) this._sections = {}
-      this._sections[name] = options.fn(this)
-      return null
-    }
-  }
-}))
-
-app.set('view engine', '.hbs')
-app.use(express.static(`${__dirname}/public`))
 
 app.post('/webhook/:token', (req, res) => {
   if (!checkToken(req.params.token, res)) {
@@ -75,46 +58,94 @@ app.post('/webhook/:token', (req, res) => {
     })
 })
 
-app.post('/deploy/:token', (req, res) => {
-  if (req.params.token !== token) {
-    logger.log('Webhook called with invalid or missing token.')
-    return res.status(401).send('Access Denied: Token Invalid\n').end()
-  }
+if (config.enableFrontEnd) {
+  const exphbs = require('express-handlebars')
 
-  const payload = req.body
-  const { imageName } = payload
+  /* view engine (handlebars) */
+  app.engine('.hbs', exphbs({
+    defaultLayout: 'main',
+    extname: '.hbs',
+    helpers: {
+      section(name, options) {
+        if (!this._sections) this._sections = {}
+        this._sections[name] = options.fn(this)
+        return null
+      }
+    }
+  }))
 
-  if (!services[imageName]) {
-    logger.log(`Received deploy request for "${imageName}" but not configured to handle updates for this image.`)
-    return
-  }
+  app.set('view engine', '.hbs')
 
-  const image = services[imageName]
-  const service = image.service
+  app.use(express.static(`${__dirname}/public`))
 
-  logger.log(`Manually deploying ${imageName}`)
+  app.post('/deploy/:token', (req, res) => {
+    if (req.params.token !== token) {
+      logger.log('Webhook called with invalid or missing token.')
+      return res.status(401).send('Access Denied: Token Invalid\n').end()
+    }
 
-  docker.deploy(imageName, service)
-    .then((msg) => {
-      notify('pull', true, msg, image)
-    })
-    .catch((err) => {
-      logger.error(err)
-      notify('pull', false, err, image)
-    })
+    const payload = req.body
+    const { imageName } = payload
+
+    if (!services[imageName]) {
+      logger.log(`Received deploy request for "${imageName}" but not configured to handle updates for this image.`)
+      return
+    }
+
+    const image = services[imageName]
+    const service = image.service
+
+    logger.log(`Manually deploying ${imageName}`)
+
+    docker.deploy(imageName, service)
+      .then((msg) => {
+        notify('pull', true, msg, image)
+      })
+      .catch((err) => {
+        logger.error(err)
+        notify('pull', false, err, image)
+      })
+  })
+
+  app.get('/services/:token', (req, res) => {
+    if (checkToken(req.params.token, res)) {
+      res.json({ services: Object.keys(services) })
+    }
+  })
+
+  app.get('/deploy/dashboard/:token', (req, res) => {
+    if (checkToken(req.params.token, res)) {
+      res.render('dashboard', { token })
+    }
+  })
+}
+
+// default route
+app.all('*', (req, res) => {
+  res.send('')
 })
 
-app.get('/services/:token', (req, res) => {
-  if (checkToken(req.params.token, res)) {
-    res.json({ services: Object.keys(services) })
+// start webserver
+if (config.sslCert && config.sslKey) {
+  // start server with HTTPS only if SSL key & cert have been provided
+  const https = require('https')
+  const options = {
+    key: config.sslKey,
+    cert: config.sslCert
   }
-})
+  https.createServer(options, app).listen(port, serverStartCallback)
+} else {
+  // start HTTP server
+  app.listen(port, serverStartCallback)
+}
 
-app.get('/deploy/dashboard/:token', (req, res) => {
-  if (checkToken(req.params.token, res)) {
-    res.render('dashboard', { token })
-  }
-})
+function serverStartCallback(err) {
+  if (err) throw new Error(`Couldn't start server: ${err}`)
+
+  const protocol = (config.sslCert && config.sslKey) ? 'https' : 'http'
+  const frontEndStatus = (config.enableFrontEnd) ? 'enabled' : 'disabled'
+  logger.log(`Listening for webhooks on ${protocol}://localhost:${port}/webhook/${token} with frontend ${frontEndStatus}`)
+}
 
 function checkToken(tokenSent, res) {
   if (tokenSent !== token) {
@@ -124,12 +155,3 @@ function checkToken(tokenSent, res) {
   }
   return true
 }
-
-app.all('*', (req, res) => {
-  res.send('')
-})
-
-app.listen(port, err => {
-  if (err) throw err
-  logger.log(`Listening for webhooks on http://localhost:${port}/webhook/${token}`)
-})
