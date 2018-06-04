@@ -44,6 +44,7 @@ WORKDIR /usr/src/app/
 
 # If GITHUB_TOKEN & GITHUB_URL are set, entrypoint script will pull config file
 COPY scripts/fetchConfigFromGithub.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/fetchConfigFromGithub.sh
 
 # install packages before copying code to take advantage of image layer caching
 COPY package.json .
