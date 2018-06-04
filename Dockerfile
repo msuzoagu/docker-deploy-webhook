@@ -12,7 +12,12 @@ ENV PORT=3000
 ENV CONFIG="production"
 
 # Location of config.json
-ENV CONFIG_PATH=/usr/src/app/config/config.json
+ENV CONFIG_DIR=/usr/src/app/config/
+ENV CONFIG_FILE=config.json
+
+# Github Settings - optionally used to pull the config file
+# ENV GITHUB_TOKEN
+# ENV GITHUB_URL
 
 # A token used to restrict access to the webhook
 # ENV TOKEN="123-456-ABC-DEF"
@@ -45,6 +50,8 @@ RUN npm install
 
 # copy everything else
 COPY . .
+
+RUN chmod +x ./scripts/*.sh
 
 EXPOSE ${PORT}
 CMD [ "npm", "start" ]
