@@ -58,7 +58,7 @@ COPY scripts/fetchConfigFromGithub.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/fetchConfigFromGithub.sh
 
 COPY . .
-RUN npm install --unsafe-perm
+RUN npm install
 
 ENTRYPOINT ["/usr/local/bin/fetchConfigFromGithub.sh"]
 CMD [ "npm", "start" ]
