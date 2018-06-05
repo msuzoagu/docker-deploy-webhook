@@ -51,20 +51,14 @@ ENV ENABLE_FRONTEND=false
 
 RUN apk update && apk add docker && apk add git
 
-# create non-root user for app to run under
-RUN addgroup -S app && adduser -S -G app app
-
 WORKDIR /usr/src/app/
 
 # If GITHUB_TOKEN & GITHUB_URL are set, entrypoint script will pull config file
 COPY scripts/fetchConfigFromGithub.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/fetchConfigFromGithub.sh && chown app /usr/local/bin/fetchConfigFromGithub.sh
+RUN chmod +x /usr/local/bin/fetchConfigFromGithub.sh
 
-RUN chown -R app /usr/src/app
-
-USER app
 COPY . .
-RUN npm install
+RUN npm install --unsafe-perm
 
 ENTRYPOINT ["/usr/local/bin/fetchConfigFromGithub.sh"]
 CMD [ "npm", "start" ]
