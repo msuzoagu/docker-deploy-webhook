@@ -1,0 +1,25 @@
+{
+  "staging": {
+    "msuzoagu/stg_nginx_portfolio:latest": {
+      "nickName": "stg_nginx_portfolio",
+      "service": "portfolio_nginx",
+      "options": {}      
+    },
+    "msuzoagu/stg_sinatra_portfolio:latest":{
+      "nickName": "stg_sinatra_portfolio",
+      "service": "portfolio_sinatra"
+    }
+  },
+  "production": {
+    "msuzoagu/pdt_nginx_portfolio:latest": {
+      "nickName": "pdt_nginx_portfolio", 
+      "service": "portfolio_nginx",
+      "options": {}      
+    },    
+    "msuzoagu/pdt_sinatra_portfolio:latest": {
+      "nickName": "pdt_sinatra_portfolio", 
+      "service": "portfolio_sinatra",
+      "options": {}
+    }
+  }  
+}
