@@ -6,11 +6,11 @@ FROM node:8-alpine
 ##  -You can set the vars here, with the Docker run command, or in a Docker compose/stack file
 
 # Port to run on
-ENV PORT=3000
+ENV PORT=16065
 EXPOSE ${PORT}
 
 #  Which configuration in the config.json file to load
-ARG CONFIG="production"
+ARG CONFIG="staging"
 ENV CONFIG=${CONFIG}
 
 # Location of config.json
