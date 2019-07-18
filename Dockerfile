@@ -10,7 +10,7 @@ ENV PORT=3000
 EXPOSE ${PORT}
 
 #  Which configuration in the config.json file to load
-ARG CONFIG="staging"
+ARG CONFIG="production"
 ENV CONFIG=${CONFIG}
 
 # Location of config.json
