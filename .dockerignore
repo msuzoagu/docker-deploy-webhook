@@ -1,4 +1,10 @@
 .git
 .gitignore
 .cache
+payload.json
 node_modules
+README.md
+myreadme.md
+**/config/sample-compose.yml
+**/config/README.md
+**/config/config.example.json
